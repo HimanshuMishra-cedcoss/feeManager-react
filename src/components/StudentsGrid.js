@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { PageHeader } from "antd";
+import { PageHeader, Row } from "antd";
 // import "antd/dist/antd.css";
 import "antd/dist/antd.min.css";
-import { Space, Table, Tag, Button } from "antd";
+import { ExclamationCircleFilled } from "@ant-design/icons";
+
+import { Space, Table, Tag, Button, Modal } from "antd";
 import axios from "axios";
 import StudentData from "./StudentData";
 import { useNavigate } from "react-router-dom";
-
+const { confirm } = Modal;
 function StudentsGrid() {
   let navigate = useNavigate();
   const [StudentsData, setStudentsData] = useState([]);
@@ -45,7 +47,7 @@ function StudentsGrid() {
       title: "Name",
       dataIndex: "studentName",
       key: "studentName",
-      render: (text) => <a>{text}</a>,
+      render: (text) => <Button type="link">{text}</Button>,
     },
     {
       title: "Father Name",
@@ -119,14 +121,42 @@ function StudentsGrid() {
     {
       title: "Action",
       render: (record) => (
-        <a
-          onClick={() => {
-            console.log(record, "record");
-            navigate("/studentdata", { state: record });
-          }}
-        >
-          View
-        </a>
+        <Row align={"stretch"}>
+          <Button
+            type="link"
+            onClick={() => {
+              console.log(record, "record");
+              navigate("/studentdata", { state: record });
+            }}
+          >
+            View
+          </Button>
+
+          <Button
+            type="link"
+            onClick={() => {
+              console.log(record, "record");
+              confirm({
+                title: "Are you sure delete this Student Data?",
+                icon: <ExclamationCircleFilled />,
+                content:
+                  "If you delete this student it will be moved to the list of deleted students.",
+                okText: "Yes",
+                okType: "danger",
+                cancelText: "No",
+                onOk() {
+                  deleteStudent(record.admissionNo);
+                },
+                onCancel() {
+                  // console.log("Cancel");
+                },
+              });
+              // navigate("/studentdata", { state: record });
+            }}
+          >
+            Delete
+          </Button>
+        </Row>
       ),
     },
     {
@@ -135,10 +165,10 @@ function StudentsGrid() {
         <a
           onClick={() => {
             axios
-            .get("http://localhost:4000/sendSms")
-            .then(function (response) {
-              console.log(response.data);
-            });
+              .get("http://localhost:4000/sendSms")
+              .then(function (response) {
+                console.log(response.data);
+              });
           }}
         >
           Send
@@ -150,6 +180,18 @@ function StudentsGrid() {
   useEffect(() => {
     getAllStudent();
   }, []);
+
+  const deleteStudent = (admissionNo) => {
+    console.log(admissionNo, "ads");
+    axios
+      .post("http://localhost:4000/students/delete", {
+        admissionNo,
+      })
+      .then((res) => {
+        console.log(res.data);
+        getAllStudent();
+      });
+  };
 
   const getAllStudent = () => {
     axios.get("http://localhost:4000/students").then((res) => {

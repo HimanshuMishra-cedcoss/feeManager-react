@@ -1,7 +1,9 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
+
 import { styled, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Tooltip from "@mui/material/Tooltip";
+// import Tooltip from "@mui/material/Tooltip";
 import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -19,8 +21,8 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import AccessibilityNewIcon from "@mui/icons-material/AccessibilityNew";
 import ContactsIcon from "@mui/icons-material/Contacts";
-import MessageIcon from '@mui/icons-material/Message';
-import { Route, Routes,Link } from "react-router-dom";
+import MessageIcon from "@mui/icons-material/Message";
+import { Route, Routes } from "react-router-dom";
 import Register from "./components/Register";
 import StudentsGrid from "./components/StudentsGrid";
 import MessageForm from "./components/MessageForm";
@@ -93,6 +95,7 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 export default function MiniDrawer() {
+  let navigate = useNavigate();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
 
@@ -138,13 +141,21 @@ export default function MiniDrawer() {
         </DrawerHeader>
         <Divider />
         <List>
-          {["Student", "Register","MessageForm"].map((text, index) => (
+          {["Students", "Register", "Messages"].map((text, index) => (
             <ListItem key={text} disablePadding sx={{ display: "block" }}>
               <ListItemButton
                 sx={{
                   minHeight: 48,
                   justifyContent: open ? "initial" : "center",
                   px: 2.5,
+                }}
+                onClick={() => {
+                  navigate(
+                    text
+                      .replace("Students", "/")
+                      .replace("Register", "/register")
+                      .replace("Messages", "/message")
+                  );
                 }}
               >
                 <ListItemIcon
@@ -154,63 +165,24 @@ export default function MiniDrawer() {
                     justifyContent: "center",
                   }}
                 >
-                  {text === "Student" ? (
-                    // <Tooltip title="Students">
-                    <Link to="/">
-
+                  {text === "Students" ? (
                     <AccessibilityNewIcon />
-                    </Link>
-
-                  ) :""}
-                  {
-                  text === "Register" ?(
-                    // </Tooltip>
-                    <Link to="/register">
-                    <ContactsIcon  />
-
-                    </Link>
-                  ):""}
-                   {
-                  text === "MessageForm" ?(
-                    // </Tooltip>
-                    <Link to="/message">
-                    <MessageIcon  />
-
-                    </Link>
-                  ):""}
+                  ) : text === "Register" ? (
+                    <ContactsIcon />
+                  ) : (
+                    <MessageIcon />
+                  )}
+                  
                 </ListItemIcon>
+
                 <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
             </ListItem>
           ))}
         </List>
-        {/* <Divider /> */}
-        {/* <List>
-          {["All mail", "Trash", "Spam"].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : "auto",
-                    justifyContent: "center",
-                  }}
-                >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List> */}
+      
       </Drawer>
-        
+
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
         <Routes>
@@ -218,7 +190,6 @@ export default function MiniDrawer() {
           <Route path="/register" element={<Register />} />
           <Route path="/message" element={<MessageForm />} />
           <Route path="/studentdata" element={<StudentData />} />
-
         </Routes>
       </Box>
     </Box>
