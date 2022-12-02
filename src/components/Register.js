@@ -101,7 +101,14 @@ const Register = () => {
         <Col span={20}>
           <Form layout="vertical">
             <Form.Item label="Sr. No" name="SrNo">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    SrNo: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Row justify={"space-between"}>
               <Col span={12}>
@@ -120,58 +127,184 @@ const Register = () => {
               </Col>
             </Row>
             <Form.Item label="Admission No">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    admissionNo: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Sessions">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    session: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Aadhar Number">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    AadharNo: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Student Name">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    studentName: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Father Name">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    fatherName: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Mother Name">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    motherName: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Permanent Address">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    permanentAddress: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Local Address">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    localAddress: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Religion">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    religion: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Caste">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    caste: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Parent's Occupation">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    parentsOccupation: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Parent's Annual Income">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    parentAnnualInc: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Date Of Birth">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    dob: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
-            <Form.Item label="Genter">
-              <Input />
+            <Form.Item label="Gender">
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    gender: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Class Applied For Admission">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    addmissionFor: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Name of Class/Exam Passed">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    lastExam: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Contact Number">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    contactNo: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
             <Form.Item label="Alternate Contact Number">
-              <Input />
+              <Input
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    alterContactNo: e.target.value,
+                  })
+                }
+              />
             </Form.Item>
           </Form>
         </Col>
