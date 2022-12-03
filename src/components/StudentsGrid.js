@@ -1,39 +1,59 @@
 import React, { useEffect, useState } from "react";
-import { PageHeader, Row } from "antd";
-// import "antd/dist/antd.css";
+import { Divider, PageHeader, Row } from "antd";
 import "antd/dist/antd.min.css";
 import { ExclamationCircleFilled } from "@ant-design/icons";
-
-import { Space, Table, Tag, Button, Modal } from "antd";
+import { Table, Tag, Button, Modal, notification } from "antd";
 import axios from "axios";
-import StudentData from "./StudentData";
 import { useNavigate } from "react-router-dom";
 const { confirm } = Modal;
 function StudentsGrid() {
   let navigate = useNavigate();
   const [StudentsData, setStudentsData] = useState([]);
   const [singleStudentData, setSingleStudentData] = useState(" ");
-
-  //   AadharNo
-  // SrNo
-  // addmissionFor
-  // admissionNo
-  // alterContactNo
-  // caste
-  // contactNo
-  // dob
-  // fatherName
-  // gender
-  // lastExam
-  // localAddress
-  // medium
-  // motherName
-  // parentAnnualInc
-  // parentsOccupation
-  // permanentAddress
-  // previousSchool
-  // religion
-  // studentName
+  const [DelLoader, setDelLoader] = useState(false);
+  const [sendLoader, setSendLoader] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const onSelectChange = (newSelectedRowKeys, selectedRows) => {
+    console.log("selectedRowKeys changed: ", newSelectedRowKeys, selectedRows);
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+      {
+        key: "odd",
+        text: "Select Odd Row",
+        onSelect: (changableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return false;
+            }
+            return true;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+      {
+        key: "even",
+        text: "Select Even Row",
+        onSelect: (changableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return true;
+            }
+            return false;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+    ],
+  };
 
   const columns = [
     {
@@ -73,12 +93,22 @@ function StudentsGrid() {
       key: "dob",
       render: (text) => <>{text || "NA"}</>,
     },
-    // {
-    //   title: "Gender",
-    //   dataIndex: "gender",
-    //   key: "gender",
-    //   render: (text) => <>{text || "NA"}</>,
-    // },
+    {
+      title: "Session",
+      dataIndex: "session",
+      key: "session",
+      render: (text) => <>{text || "NA"}</>,
+      filters: [
+        {
+          text: "2020-2021",
+          value: "2020-2021",
+        },
+        {
+          text: "2021-2022",
+          value: "2021-2022",
+        },
+      ],
+    },
     {
       title: "Permanent Address",
       dataIndex: "permanentAddress",
@@ -126,7 +156,7 @@ function StudentsGrid() {
             type="link"
             onClick={() => {
               console.log(record, "record");
-              navigate("/studentdata", { state: record });
+              navigate("/viewStudent", { state: record });
             }}
           >
             View
@@ -135,7 +165,6 @@ function StudentsGrid() {
           <Button
             type="link"
             onClick={() => {
-              console.log(record, "record");
               confirm({
                 title: "Are you sure delete this Student Data?",
                 icon: <ExclamationCircleFilled />,
@@ -144,6 +173,9 @@ function StudentsGrid() {
                 okText: "Yes",
                 okType: "danger",
                 cancelText: "No",
+                okButtonProps: {
+                  loading: DelLoader,
+                },
                 onOk() {
                   deleteStudent(record.admissionNo);
                 },
@@ -177,29 +209,59 @@ function StudentsGrid() {
     },
   ];
 
+  const openToast = (msg) => {
+    notification.info({
+      message: msg,
+      duration: 3,
+      // description: "Fsdf",
+      placement: "bottom",
+    });
+  };
+
   useEffect(() => {
     getAllStudent();
   }, []);
 
   const deleteStudent = (admissionNo) => {
-    console.log(admissionNo, "ads");
+    setDelLoader(true);
     axios
       .post("http://localhost:4000/students/delete", {
         admissionNo,
       })
       .then((res) => {
-        console.log(res.data);
-        getAllStudent();
+        console.log(res, "res");
+        if (res.data.success) {
+          getAllStudent();
+          openToast(res.data.message);
+        } else {
+          openToast(res.data.message);
+        }
+        setDelLoader(false);
       });
   };
 
-  const getAllStudent = () => {
-    axios.get("http://localhost:4000/students").then((res) => {
-      console.log(res.data);
-      setStudentsData(res.data);
-    });
+  const getAllStudent = (filter) => {
+    console.log(filter, "filter");
+    axios
+      .post("http://localhost:4000/students", filter ? { session: filter } : {})
+      .then((res) => {
+        console.log(res.data);
+        let keyAddedRow = res.data.map((ele) => {
+          ele["key"] = ele.admissionNo;
+          return ele;
+        });
+        setStudentsData(keyAddedRow);
+      });
   };
 
+  const tableChange = (pagination, filters, sorter, extra) => {
+    console.log("params", pagination, filters, sorter, extra);
+    if (filters.session) {
+      getAllStudent(filters.session);
+    } else {
+      getAllStudent();
+    }
+  };
   return (
     <>
       <PageHeader
@@ -212,7 +274,47 @@ function StudentsGrid() {
         subTitle="All students record"
       />
       <br />
-      <Table columns={columns} dataSource={StudentsData} />
+      {selectedRowKeys.length !== 0 && (
+        <div
+          style={{
+            marginBottom: 16,
+          }}
+        >
+          <Button
+            type="primary"
+            size="middle"
+            onClick={() => {
+              confirm({
+                title: "Fee Reminder",
+                icon: <ExclamationCircleFilled />,
+                content:
+                  "It will send sms to all the selected contacts for fees reminder.",
+                okText: "Send",
+                okType: "primary",
+                cancelText: "No",
+                okButtonProps: {
+                  loading: sendLoader,
+                },
+                onOk() {
+                  // deleteStudent(record.admissionNo);
+                },
+                onCancel() {
+                  // console.log("Cancel");
+                },
+              });
+            }}
+          >
+            Fee Reminder
+          </Button>
+        </div>
+      )}
+
+      <Table
+        columns={columns}
+        dataSource={StudentsData}
+        rowSelection={rowSelection}
+        onChange={tableChange}
+      />
       {/* <StudentData data={singleStudentD+ata} />; */}
     </>
   );

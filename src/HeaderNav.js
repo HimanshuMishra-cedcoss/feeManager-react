@@ -172,7 +172,6 @@ export default function MiniDrawer() {
                   ) : (
                     <MessageIcon />
                   )}
-                  
                 </ListItemIcon>
 
                 <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
@@ -180,7 +179,6 @@ export default function MiniDrawer() {
             </ListItem>
           ))}
         </List>
-      
       </Drawer>
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
@@ -190,6 +188,7 @@ export default function MiniDrawer() {
           <Route path="/register" element={<Register />} />
           <Route path="/message" element={<MessageForm />} />
           <Route path="/studentdata" element={<StudentData />} />
+          <Route path="/viewStudent" element={<Register />} />
         </Routes>
       </Box>
     </Box>

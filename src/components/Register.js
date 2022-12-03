@@ -1,40 +1,61 @@
 import React from "react";
-import { useState } from "react";
-// import Button from "react-bootstrap/Button";
-import { PageHeader, Card, Row, Col, Upload } from "antd";
-import { Button, Checkbox, Form, Input } from "antd";
+import { useState, useRef } from "react";
+import ReactToPrint from "react-to-print";
+// import { ComponentToPrint } from "./ComponentToPrint";
+import {
+  Button,
+  Select,
+  Form,
+  Input,
+  Modal,
+  DatePicker,
+  Checkbox,
+  PageHeader,
+  Row,
+  Col,
+  Upload,
+  Radio,
+  notification,
+} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-
-// import Button from "@mui/material/Button";s
-// import Form from "react-bootstrap/Form";
+import dayjs from "dayjs";
 import axios from "axios";
-import { TextField } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useReactToPrint } from "react-to-print";
+import { useNavigate, useLocation } from "react-router-dom";
+import { ExclamationCircleFilled } from "@ant-design/icons";
 
 const Register = () => {
   let navigate = useNavigate();
+  let formRef = useRef();
+  const location = useLocation();
+  console.log(location);
+  const { RangePicker } = DatePicker;
   const [image, setImage] = useState(null);
+  const [agree, setAgree] = useState(false);
+  const [loader, setLoader] = useState(false);
   const [studentData, setStudentData] = useState({
-    AadharNo: "",
-    SrNo: "",
-    addmissionFor: "",
-    admissionNo: "",
-    alterContactNo: "",
-    caste: "",
-    contactNo: "",
-    dob: "",
-    fatherName: "",
-    gender: "",
-    lastExam: "",
-    localAddress: "",
-    medium: "",
-    motherName: "",
-    parentAnnualInc: "",
-    parentsOccupation: "",
-    permanentAddress: "",
-    previousSchool: "",
-    religion: "",
-    studentName: "",
+    AadharNo: (location.state && location.state.AadharNo) || "",
+    SrNo: (location.state && location.state.SrNo) || "",
+    addmissionFor: (location.state && location.state.addmissionFor) || "",
+    admissionNo: (location.state && location.state.admissionNo) || "",
+    alterContactNo: (location.state && location.state.alterContactNo) || "",
+    caste: (location.state && location.state.caste) || "",
+    contactNo: (location.state && location.state.contactNo) || "",
+    dob: (location.state && location.state.dob) || "",
+    fatherName: (location.state && location.state.fatherName) || "",
+    gender: (location.state && location.state.gender) || "",
+    lastExam: (location.state && location.state.lastExam) || "",
+    localAddress: (location.state && location.state.localAddress) || "",
+    medium: (location.state && location.state.medium) || "",
+    motherName: (location.state && location.state.motherName) || "",
+    parentAnnualInc: (location.state && location.state.parentAnnualInc) || "",
+    parentsOccupation:
+      (location.state && location.state.parentsOccupation) || "",
+    permanentAddress: (location.state && location.state.permanentAddress) || "",
+    previousSchool: (location.state && location.state.previousSchool) || "",
+    religion: (location.state && location.state.religion) || "",
+    studentName: (location.state && location.state.studentName) || "",
+    RTE: (location.state && location.state.RTE) || "no",
   });
 
   const handleImageChange = (e) => {
@@ -73,16 +94,69 @@ const Register = () => {
       });
   };
 
-  const submitForm = (e) => {
-    e.preventDefault();
+  const handlePrint = useReactToPrint(
+    {
+      content: () => formRef.current,
+    },
+    () => {
+      console.log("hell");
+    }
+  );
 
-    console.log(studentData);
+  const editStudent = () => {
+    axios
+      .post("http://localhost:4000/students/editStudent", {
+        ...{
+          admissionNo: location.state.admissionNo,
+        },
+        ...studentData,
+      })
+      .then(function (response) {
+        if (response.data.success) {
+          notification.info({
+            message: response.data.message,
+            duration: 3,
+            placement: "bottom",
+            style: { backgroundColor: "lightgreen" },
+          });
+          setTimeout(() => {
+            navigate("/");
+          });
+        } else {
+        }
+      });
+  };
 
+  const submitForm = () => {
     axios
       .post("http://localhost:4000/register", studentData)
       .then(function (response) {
-        console.log(response.data);
-        navigate("/");
+        if (response.data.success) {
+          setLoader(false);
+          notification.info({
+            message: response.data.message,
+            duration: 3,
+            placement: "bottom",
+            style: { backgroundColor: "lightgreen" },
+          });
+          Modal.confirm({
+            title: "Would you like to print registration form?",
+            icon: <ExclamationCircleFilled />,
+            okText: "Print",
+            cancelText: "No",
+            onOk() {
+              handlePrint();
+              setTimeout(() => {
+                navigate("/");
+              });
+            },
+            onCancel() {
+              navigate("/");
+            },
+          });
+        } else {
+          setLoader(false);
+        }
       });
   };
   return (
@@ -90,18 +164,31 @@ const Register = () => {
       <PageHeader
         className="site-page-header"
         // onBack={() => null}
-        title="Register"
+        title={
+          location.pathname === "/viewStudent" ? "View Student" : "Register"
+        }
         // avatar={{
         //   src: "https://avatars1.githubusercontent.com/u/8186664?s=460&v=4",
         // }}
-        subTitle="Here You Can Register Student"
+        extra={
+          location.state && location.state.RTE === "no"
+            ? [<Button type="primary">Submit Fee</Button>]
+            : []
+        }
+        subTitle={`Here You Can${
+          location.pathname === "/viewStudent" ? " View and Edit" : " Register"
+        } Student`}
       />
       <br />
-      <Row justify="center">
+
+      <Row justify="center" ref={formRef}>
         <Col span={20}>
           <Form layout="vertical">
-            <Form.Item label="Sr. No" name="SrNo">
+            <Form.Item label="Sr. No">
               <Input
+                value={studentData.SrNo}
+                disabled={location.pathname === "/viewStudent"}
+                type="number"
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -128,6 +215,9 @@ const Register = () => {
             </Row>
             <Form.Item label="Admission No">
               <Input
+                disabled={location.pathname === "/viewStudent"}
+                value={studentData.admissionNo}
+                type="number"
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -136,18 +226,46 @@ const Register = () => {
                 }
               />
             </Form.Item>
-            <Form.Item label="Sessions">
-              <Input
-                onChange={(e) =>
-                  setStudentData({
-                    ...studentData,
-                    session: e.target.value,
-                  })
-                }
-              />
-            </Form.Item>
+            <Row>
+              <Col span={12}>
+                <Form.Item label="Sessions">
+                  <RangePicker
+                    picker="year"
+                    // value={
+                    //   location.state.session &&
+                    //   location.state.session.split("-")
+                    // }
+                    onChange={(v, m) => {
+                      setStudentData({
+                        ...studentData,
+                        session: m[0] + "-" + m[1],
+                      });
+                    }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="Date Of Birth">
+                  {/* {console.log(dayjs(location.state.dob))} */}
+                  <DatePicker
+                    format={"DD-MM-YYYY"}
+                    // value={dayjs(location.state.dob, "DD-MM-YYYY")}
+                    onChange={(e, d) => {
+                      console.log(e, d, "hee");
+                      setStudentData({
+                        ...studentData,
+                        dob: d,
+                      });
+                    }}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
             <Form.Item label="Aadhar Number">
               <Input
+                type="number"
+                value={studentData.AadharNo}
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -158,6 +276,7 @@ const Register = () => {
             </Form.Item>
             <Form.Item label="Student Name">
               <Input
+                value={studentData.studentName}
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -168,6 +287,7 @@ const Register = () => {
             </Form.Item>
             <Form.Item label="Father Name">
               <Input
+                value={studentData.fatherName}
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -178,6 +298,7 @@ const Register = () => {
             </Form.Item>
             <Form.Item label="Mother Name">
               <Input
+                value={studentData.motherName}
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -188,6 +309,7 @@ const Register = () => {
             </Form.Item>
             <Form.Item label="Permanent Address">
               <Input
+                value={studentData.permanentAddress}
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -198,6 +320,7 @@ const Register = () => {
             </Form.Item>
             <Form.Item label="Local Address">
               <Input
+                value={studentData.localAddress}
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -208,6 +331,7 @@ const Register = () => {
             </Form.Item>
             <Form.Item label="Religion">
               <Input
+                value={studentData.religion}
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -218,6 +342,7 @@ const Register = () => {
             </Form.Item>
             <Form.Item label="Caste">
               <Input
+                value={studentData.caste}
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -228,6 +353,7 @@ const Register = () => {
             </Form.Item>
             <Form.Item label="Parent's Occupation">
               <Input
+                value={studentData.parentsOccupation}
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -238,6 +364,7 @@ const Register = () => {
             </Form.Item>
             <Form.Item label="Parent's Annual Income">
               <Input
+                value={studentData.parentAnnualInc}
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -246,28 +373,45 @@ const Register = () => {
                 }
               />
             </Form.Item>
-            <Form.Item label="Date Of Birth">
-              <Input
-                onChange={(e) =>
-                  setStudentData({
-                    ...studentData,
-                    dob: e.target.value,
-                  })
-                }
-              />
-            </Form.Item>
-            <Form.Item label="Gender">
-              <Input
-                onChange={(e) =>
-                  setStudentData({
-                    ...studentData,
-                    gender: e.target.value,
-                  })
-                }
-              />
-            </Form.Item>
+
+            <Row justify={"space-between"}>
+              <Col span={12}>
+                <Form.Item label="Gender">
+                  <Radio.Group
+                    value={studentData.gender}
+                    onChange={(e) => {
+                      setStudentData({
+                        ...studentData,
+                        gender: e.target.value,
+                      });
+                    }}
+                  >
+                    <Radio value={"Male"}>Male</Radio>
+                    <Radio value={"Female"}>Female</Radio>
+                  </Radio.Group>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="Medium">
+                  <Radio.Group
+                    value={studentData.medium}
+                    onChange={(e) => {
+                      setStudentData({
+                        ...studentData,
+                        medium: e.target.value,
+                      });
+                    }}
+                  >
+                    <Radio value={"English"}>English</Radio>
+                    <Radio value={"Hindi"}>Hindi</Radio>
+                  </Radio.Group>
+                </Form.Item>
+              </Col>
+            </Row>
+
             <Form.Item label="Class Applied For Admission">
               <Input
+                value={studentData.addmissionFor}
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -278,6 +422,7 @@ const Register = () => {
             </Form.Item>
             <Form.Item label="Name of Class/Exam Passed">
               <Input
+                value={studentData.lastExam}
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -286,8 +431,21 @@ const Register = () => {
                 }
               />
             </Form.Item>
+            <Form.Item label="Name of Last School">
+              <Input
+                value={studentData.previousSchool}
+                onChange={(e) =>
+                  setStudentData({
+                    ...studentData,
+                    previousSchool: e.target.value,
+                  })
+                }
+              />
+            </Form.Item>
             <Form.Item label="Contact Number">
               <Input
+                value={studentData.contactNo}
+                type="number"
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -298,6 +456,8 @@ const Register = () => {
             </Form.Item>
             <Form.Item label="Alternate Contact Number">
               <Input
+                value={studentData.alterContactNo}
+                type="number"
                 onChange={(e) =>
                   setStudentData({
                     ...studentData,
@@ -305,6 +465,161 @@ const Register = () => {
                   })
                 }
               />
+            </Form.Item>
+            <Form.Item label="Right to Education Eligible Student">
+              <Select
+                defaultValue="no"
+                allowClear
+                value={studentData.RTE}
+                onChange={(e) => {
+                  console.log(e);
+                  setStudentData({
+                    ...studentData,
+                    RTE: e,
+                  });
+                }}
+                options={[
+                  {
+                    label: "Yes",
+                    value: "yes",
+                  },
+                  {
+                    label: "No",
+                    value: "no",
+                  },
+                ]}
+              />
+            </Form.Item>
+            {studentData.RTE === "no" && location.pathname === "/register" && (
+              <>
+                <Form.Item label="Total Fess for a Year">
+                  <Input
+                    type="number"
+                    onChange={(e) =>
+                      setStudentData({
+                        ...studentData,
+                        totalFee: e.target.value,
+                      })
+                    }
+                  />
+                </Form.Item>
+                <Form.Item label="Paid Fess">
+                  <Input
+                    type="number"
+                    onChange={(e) =>
+                      setStudentData({
+                        ...studentData,
+                        totalFee: e.target.value,
+                      })
+                    }
+                  />
+                </Form.Item>
+                <Form.Item label="Fees Submitted till Which Month">
+                  <Select
+                    defaultValue={
+                      new Date().getMonth() + "-" + new Date().getFullYear()
+                    }
+                    allowClear
+                    onChange={(e) => {
+                      setStudentData({
+                        ...studentData,
+                        submitFillMonth: e,
+                      });
+                    }}
+                    options={[
+                      {
+                        label: "January",
+                        value: 0 + "-" + new Date().getFullYear(),
+                      },
+                      {
+                        label: "Feburary",
+                        value: 1 + "-" + new Date().getFullYear(),
+                      },
+                      {
+                        label: "March",
+                        value: 2 + "-" + new Date().getFullYear(),
+                      },
+                      {
+                        label: "April",
+                        value: 3 + "-" + new Date().getFullYear(),
+                      },
+                      {
+                        label: "May",
+                        value: 4 + "-" + new Date().getFullYear(),
+                      },
+                      {
+                        label: "June",
+                        value: 5 + "-" + new Date().getFullYear(),
+                      },
+                      {
+                        label: "July",
+                        value: 6 + "-" + new Date().getFullYear(),
+                      },
+                      {
+                        label: "August",
+                        value: 7 + "-" + new Date().getFullYear(),
+                      },
+                      {
+                        label: "September",
+                        value: 8 + "-" + new Date().getFullYear(),
+                      },
+                      {
+                        label: "October",
+                        value: 9 + "-" + new Date().getFullYear(),
+                      },
+                      {
+                        label: "November",
+                        value: 10 + "-" + new Date().getFullYear(),
+                      },
+                      {
+                        label: "December",
+                        value: 11 + "-" + new Date().getFullYear(),
+                      },
+                    ]}
+                  />
+                </Form.Item>
+              </>
+            )}
+            {location.pathname === "/register" && (
+              <Form.Item>
+                <Checkbox
+                  onChange={(e) => {
+                    setAgree(e.target.checked);
+                  }}
+                >
+                  I hereby decalare that all information qbove filled is true to
+                  best of my knowledge and i agree to abide by the school rules
+                  of regulation.
+                </Checkbox>
+              </Form.Item>
+            )}
+            <Form.Item>
+              <Button
+                type="primary"
+                loading={loader}
+                onClick={() => {
+                  setLoader(true);
+                  if (location.pathname === "/register") {
+                    if (agree) {
+                      submitForm();
+                    } else {
+                      setLoader(false);
+                      notification.error({
+                        message: "Agree the decalarion.",
+                        duration: 3,
+                        placement: "bottom",
+                        description:
+                          "Please tick the checkbox of aggrement to register the student.",
+                        style: { backgroundColor: "#FFCCCB" },
+                      });
+                    }
+                  } else {
+                    editStudent();
+                  }
+                }}
+              >
+                {location.pathname === "/viewStudent" ? "Edit" : "Submit"}
+              </Button>
             </Form.Item>
           </Form>
         </Col>
