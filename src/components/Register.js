@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import ReactToPrint from "react-to-print";
 // import { ComponentToPrint } from "./ComponentToPrint";
 import {
@@ -32,7 +32,10 @@ const Register = () => {
   const { RangePicker } = DatePicker;
   const [image, setImage] = useState(null);
   const [agree, setAgree] = useState(false);
+  const [feePay, setFeesPay] = useState(0);
   const [loader, setLoader] = useState(false);
+  const [monthOptions, setMonthsOption] = useState([]);
+  const [feeLoader, setFeeLoader] = useState(false);
   const [studentData, setStudentData] = useState({
     AadharNo: (location.state && location.state.AadharNo) || "",
     SrNo: (location.state && location.state.SrNo) || "",
@@ -159,6 +162,68 @@ const Register = () => {
         }
       });
   };
+
+  useEffect(() => {
+    getFeeMonth();
+  }, []);
+
+  const getFeeMonth = () => {
+    let monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    let monthOpt = [];
+    let d = new Date();
+    d.setDate(1); //REM: To prevent month skipping.
+
+    for (var i = 0; i < 12; i++) {
+      d.setMonth(d.getMonth() + 1);
+      console.log(monthNames[d.getMonth()], d.getFullYear());
+      monthOpt.push({
+        label: monthNames[d.getMonth()] + " " + d.getFullYear(),
+        value: d.getMonth() + "-" + d.getFullYear(),
+      });
+    }
+    setMonthsOption(monthOpt);
+  };
+
+  const submitFees = () => {
+    axios
+      .post("http://localhost:4000/submitFee", {
+        admissionNo: location.state.admissionNo,
+        submitFillMonth: studentData.submitFillMonth,
+        paidFees: feePay,
+      })
+      .then(function (response) {
+        if (response.data.success) {
+          setFeeLoader(false);
+          console.log(response.data);
+          notification.info({
+            message: response.data.message,
+            duration: 3,
+            placement: "bottom",
+          });
+        } else {
+          setFeeLoader(false);
+          notification.info({
+            message: response.data.message,
+            duration: 3,
+            placement: "bottom",
+          });
+        }
+      });
+  };
+
   return (
     <>
       <PageHeader
@@ -172,7 +237,85 @@ const Register = () => {
         // }}
         extra={
           location.state && location.state.RTE === "no"
-            ? [<Button type="primary">Submit Fee</Button>]
+            ? [
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    Modal.confirm({
+                      title: "Would you like to pay fees?",
+                      content: (
+                        <Row>
+                          <br />
+                          <Form layout="vertical">
+                            <Form.Item label="Total Fees">
+                              <Input
+                                disabled
+                                value={location.state.totalFee}
+                              ></Input>
+                            </Form.Item>
+
+                            <Form.Item label="Already Paid Fees">
+                              <Input
+                                value={location.state.paidFees}
+                                disabled
+                              ></Input>
+                            </Form.Item>
+
+                            <Form.Item label="Remaining Fees">
+                              <Input
+                                type="number"
+                                onChange={(e) => {
+                                  setFeesPay(e.target.value);
+                                  console.log(feePay);
+                                }}
+                              ></Input>
+                            </Form.Item>
+                            <Form.Item label="Fees Paid Already(Month)">
+                              <Select
+                                allowClear
+                                disabled
+                                onChange={(e) => {
+                                  setStudentData({
+                                    ...studentData,
+                                    submitFillMonth: e,
+                                  });
+                                }}
+                                options={monthOptions}
+                                value={location.state.submitFillMonth}
+                              />
+                            </Form.Item>
+                            <Form.Item label="Fees Submitted till Month">
+                              <Select
+                                allowClear
+                                onChange={(e) => {
+                                  setStudentData({
+                                    ...studentData,
+                                    submitFillMonth: e,
+                                  });
+                                }}
+                                options={monthOptions}
+                              />
+                            </Form.Item>
+                          </Form>
+                        </Row>
+                      ),
+                      icon: <ExclamationCircleFilled />,
+                      okText: "Pay",
+                      cancelText: "Cancel",
+                      okButtonProps: {
+                        loading: feeLoader,
+                      },
+                      onOk() {
+                        setFeeLoader(true);
+                        submitFees();
+                      },
+                      onCancel() {},
+                    });
+                  }}
+                >
+                  Submit Fee
+                </Button>,
+              ]
             : []
         }
         subTitle={`Here You Can${
@@ -509,73 +652,23 @@ const Register = () => {
                     onChange={(e) =>
                       setStudentData({
                         ...studentData,
-                        totalFee: e.target.value,
+                        paidFees: e.target.value,
                       })
                     }
                   />
                 </Form.Item>
                 <Form.Item label="Fees Submitted till Which Month">
                   <Select
-                    defaultValue={
-                      new Date().getMonth() + "-" + new Date().getFullYear()
-                    }
+                    placeholder={"Please choose..."}
                     allowClear
                     onChange={(e) => {
+                      console.log(e, "sub");
                       setStudentData({
                         ...studentData,
                         submitFillMonth: e,
                       });
                     }}
-                    options={[
-                      {
-                        label: "January",
-                        value: 0 + "-" + new Date().getFullYear(),
-                      },
-                      {
-                        label: "Feburary",
-                        value: 1 + "-" + new Date().getFullYear(),
-                      },
-                      {
-                        label: "March",
-                        value: 2 + "-" + new Date().getFullYear(),
-                      },
-                      {
-                        label: "April",
-                        value: 3 + "-" + new Date().getFullYear(),
-                      },
-                      {
-                        label: "May",
-                        value: 4 + "-" + new Date().getFullYear(),
-                      },
-                      {
-                        label: "June",
-                        value: 5 + "-" + new Date().getFullYear(),
-                      },
-                      {
-                        label: "July",
-                        value: 6 + "-" + new Date().getFullYear(),
-                      },
-                      {
-                        label: "August",
-                        value: 7 + "-" + new Date().getFullYear(),
-                      },
-                      {
-                        label: "September",
-                        value: 8 + "-" + new Date().getFullYear(),
-                      },
-                      {
-                        label: "October",
-                        value: 9 + "-" + new Date().getFullYear(),
-                      },
-                      {
-                        label: "November",
-                        value: 10 + "-" + new Date().getFullYear(),
-                      },
-                      {
-                        label: "December",
-                        value: 11 + "-" + new Date().getFullYear(),
-                      },
-                    ]}
+                    options={monthOptions}
                   />
                 </Form.Item>
               </>

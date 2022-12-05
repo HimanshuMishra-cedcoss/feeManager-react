@@ -127,10 +127,22 @@ function StudentsGrid() {
     },
     {
       title: "Fee Status",
-      dataIndex: "feeStatus",
+      dataIndex: "submitFillMonth",
       key: "feeStatus",
       render: (data) => {
-        return <Tag color={"volcano"}>{data || "NA"}</Tag>;
+        let d = new Date();
+        let month = parseInt(data.split("-")[0]);
+        let year = parseInt(data.split("-")[1]);
+        let status = "NA";
+
+        if (month < d.getMonth() && year < d.getFullYear()) {
+          status = "Due";
+        } else {
+          status = "Paid";
+        }
+        return (
+          <Tag color={status === "Due" ? "volcano" : "green"}>{status}</Tag>
+        );
       },
     },
 
