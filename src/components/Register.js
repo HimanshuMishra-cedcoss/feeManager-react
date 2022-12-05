@@ -23,7 +23,8 @@ import axios from "axios";
 import { useReactToPrint } from "react-to-print";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ExclamationCircleFilled } from "@ant-design/icons";
-
+let feePay = 0;
+let monthPay = "";
 const Register = () => {
   let navigate = useNavigate();
   let formRef = useRef();
@@ -32,7 +33,7 @@ const Register = () => {
   const { RangePicker } = DatePicker;
   const [image, setImage] = useState(null);
   const [agree, setAgree] = useState(false);
-  const [feePay, setFeesPay] = useState(0);
+
   const [loader, setLoader] = useState(false);
   const [monthOptions, setMonthsOption] = useState([]);
   const [feeLoader, setFeeLoader] = useState(false);
@@ -201,7 +202,7 @@ const Register = () => {
     axios
       .post("http://localhost:4000/submitFee", {
         admissionNo: location.state.admissionNo,
-        submitFillMonth: studentData.submitFillMonth,
+        submitFillMonth: monthPay,
         paidFees: feePay,
       })
       .then(function (response) {
@@ -265,8 +266,7 @@ const Register = () => {
                               <Input
                                 type="number"
                                 onChange={(e) => {
-                                  setFeesPay(e.target.value);
-                                  console.log(feePay);
+                                  feePay = e.target.value;
                                 }}
                               ></Input>
                             </Form.Item>
@@ -274,12 +274,6 @@ const Register = () => {
                               <Select
                                 allowClear
                                 disabled
-                                onChange={(e) => {
-                                  setStudentData({
-                                    ...studentData,
-                                    submitFillMonth: e,
-                                  });
-                                }}
                                 options={monthOptions}
                                 value={location.state.submitFillMonth}
                               />
@@ -288,10 +282,7 @@ const Register = () => {
                               <Select
                                 allowClear
                                 onChange={(e) => {
-                                  setStudentData({
-                                    ...studentData,
-                                    submitFillMonth: e,
-                                  });
+                                  monthPay = e;
                                 }}
                                 options={monthOptions}
                               />

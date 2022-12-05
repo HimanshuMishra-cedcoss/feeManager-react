@@ -131,8 +131,8 @@ function StudentsGrid() {
       key: "feeStatus",
       render: (data) => {
         let d = new Date();
-        let month = parseInt(data.split("-")[0]);
-        let year = parseInt(data.split("-")[1]);
+        let month = data && parseInt(data.split("-")[0]);
+        let year = data && parseInt(data.split("-")[1]);
         let status = "NA";
 
         if (month < d.getMonth() && year < d.getFullYear()) {
