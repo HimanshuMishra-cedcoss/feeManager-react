@@ -248,21 +248,21 @@ const Register = () => {
                         <Row>
                           <br />
                           <Form layout="vertical">
-                            <Form.Item label="Total Fees">
+                            <Form.Item label="Total Fees (In Year)">
                               <Input
                                 disabled
                                 value={location.state.totalFee}
                               ></Input>
                             </Form.Item>
 
-                            <Form.Item label="Already Paid Fees">
+                            <Form.Item label="Already Paid Fees (In Year)">
                               <Input
                                 value={location.state.paidFees}
                                 disabled
                               ></Input>
                             </Form.Item>
 
-                            <Form.Item label="Remaining Fees">
+                            <Form.Item label="Remaining Fees (In Year)">
                               <Input
                                 type="number"
                                 onChange={(e) => {

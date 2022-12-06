@@ -134,7 +134,9 @@ function StudentsGrid() {
         let month = data && parseInt(data.split("-")[0]);
         let year = data && parseInt(data.split("-")[1]);
         let status = "NA";
-
+        // moonth === ye mil raha h ki kab tak ki fees jama hai
+        // year === ye mil raha h ki kab tak ki fees jama hai
+        // 10 == d.getDay();
         if (month < d.getMonth() && year < d.getFullYear()) {
           status = "Due";
         } else {
@@ -211,7 +213,7 @@ function StudentsGrid() {
             axios
               .get("http://localhost:4000/sendSms")
               .then(function (response) {
-                console.log(response.data);
+                openToast(response.data.message);
               });
           }}
         >

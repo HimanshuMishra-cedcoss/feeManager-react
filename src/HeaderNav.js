@@ -27,6 +27,7 @@ import Register from "./components/Register";
 import StudentsGrid from "./components/StudentsGrid";
 import MessageForm from "./components/MessageForm";
 import StudentData from "./components/StudentData";
+import { DeleteForeverOutlined } from "@mui/icons-material";
 const drawerWidth = 240;
 
 const openedMixin = (theme) => ({
@@ -141,43 +142,48 @@ export default function MiniDrawer() {
         </DrawerHeader>
         <Divider />
         <List>
-          {["Students", "Register", "Messages"].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                }}
-                onClick={() => {
-                  navigate(
-                    text
-                      .replace("Students", "/")
-                      .replace("Register", "/register")
-                      .replace("Messages", "/message")
-                  );
-                }}
-              >
-                <ListItemIcon
+          {["Students", "Register", "Messages", "Dropouts"].map(
+            (text, index) => (
+              <ListItem key={text} disablePadding sx={{ display: "block" }}>
+                <ListItemButton
                   sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : "auto",
-                    justifyContent: "center",
+                    minHeight: 48,
+                    justifyContent: open ? "initial" : "center",
+                    px: 2.5,
+                  }}
+                  onClick={() => {
+                    navigate(
+                      text
+                        .replace("Students", "/")
+                        .replace("Register", "/register")
+                        .replace("Messages", "/message")
+                        .replace("Dropouts", "/dropouts")
+                    );
                   }}
                 >
-                  {text === "Students" ? (
-                    <AccessibilityNewIcon />
-                  ) : text === "Register" ? (
-                    <ContactsIcon />
-                  ) : (
-                    <MessageIcon />
-                  )}
-                </ListItemIcon>
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: open ? 3 : "auto",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {text === "Students" ? (
+                      <AccessibilityNewIcon />
+                    ) : text === "Register" ? (
+                      <ContactsIcon />
+                    ) : text === "Dropouts" ? (
+                      <DeleteForeverOutlined />
+                    ) : (
+                      <MessageIcon />
+                    )}
+                  </ListItemIcon>
 
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          ))}
+                  <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
+                </ListItemButton>
+              </ListItem>
+            )
+          )}
         </List>
       </Drawer>
 
@@ -189,6 +195,7 @@ export default function MiniDrawer() {
           <Route path="/message" element={<MessageForm />} />
           <Route path="/studentdata" element={<StudentData />} />
           <Route path="/viewStudent" element={<Register />} />
+          <Route path="/dropouts" element={<StudentData />} />
         </Routes>
       </Box>
     </Box>
